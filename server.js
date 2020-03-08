@@ -2,7 +2,7 @@ const inq = require("inquirer");
 const orm = require("./config/orm.js");
 
 //add department
-orm.insert(departments, ["name"], ["Facilities"], (result) => {
+orm.insert("departments", ["name"], ["Facilities"], (result) => {
     console.table(result);
 });
 
