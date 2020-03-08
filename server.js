@@ -1,19 +1,27 @@
-const mysql = require("mysql");
 const inq = require("inquirer");
 const orm = require("./config/orm.js");
 
-const connection = mysql.createConnection({
-    host: "localhost",
-    port: 3306,
-    user: "root",
-    password: "password1",
-    database: "employees_DB"
+//add department
+orm.insert(departments, ["name"], ["Facilities"], (result) => {
+    console.table(result);
 });
 
-connection.connect((err) => {
-    if (err) {
-        console.log(`Error with Connection: ${err.stack}`);
-        return;
-    }
-    console.log(`Connected to Server at port: ${connection.threadId}`);
-});
+//add role
+
+//add employee
+
+//view joined
+
+//view departments
+
+//view roles
+
+//view employees
+
+//update employee role
+
+//update employee manager
+
+// view employees by manager
+
+//view budget for department
