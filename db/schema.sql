@@ -4,6 +4,9 @@ CREATE DATABASE employees_DB;
 
 USE employees_DB;
 
+ALTER TABLE departments
+Change name department varchar(30) not null;
+
 CREATE TABLE departments (
 id int NOT NULL AUTO_INCREMENT,
 name varchar(30) NOT NULL,
