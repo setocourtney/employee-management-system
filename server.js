@@ -1,19 +1,6 @@
 const inquirer = require("inquirer");
 const orm = require("./config/orm.js");
 
-
-const main = async () => {
-    try {
-        const newAction = await inquirer.prompt(getAction());
-        runAction(newAction.action);
-    } catch (err) {
-        err.message;
-        orm.end();
-    }
-};
-
-main();
-
 //list application action choices and returns prompt object
 const getAction = () => {
     const choices = [{
@@ -84,6 +71,20 @@ const getAction = () => {
     };
 };
 
+const main = () => {
+    inquirer.prompt(
+        getAction()
+    ).then((answer) =>{
+        runAction(answer.action);
+    })
+    .catch((err) => {
+        err.message;
+        orm.end();
+    });
+};
+
+main();
+
 //runs function based on answer to action prompt
 const runAction = (action) => {
     switch (action) {
@@ -122,28 +123,100 @@ const runAction = (action) => {
     };
 }
 
-//application function
-//add department
-    //insert(table, cols, values, cb)
+//application functions
 
 const viewAllEmployees = () => {
-    return orm.allEmployeeData((results) => {
+    orm.allEmployeeData((results) => {
         console.log("\n");
         console.table(results);
         main();
     });
 }
 
-const viewEmployeesByDept = () => {
+const addEmployee = async () => {
+    //select: (selection, table, cb)
+    const roles = await orm.select(
+            "*",
+            "roles"
+    );
+    console.log(roles);
 
-}
-
-const viewEmployeesByMgr = () => {
+    console.log(orm.select("*","roles"));
     
-}
+    // (results) => {
+    //     let listRoles = results.map((result) => {
+    //         return { name: result.title, value: result.id}
+    //     });
+    //     console.log(listRoles);
+    //     return listRoles;
+    // }
 
-const addEmployee = () => {
+
+
+
+    const managers = await orm.select(
+        "id, CONCAT(first_name, \" \", last_name) AS manager",
+        "employees",
+        (results) => {
+            let listEmployees = results.map((result) => {
+                return { name: result.manager, value: result.id}
+            });
+            listEmployees.push({ name: "No Manager", value: 0 });
+            console.log(listEmployees);
+            return listEmployees;
+        }
+    );
+
+    console.log(managers);
+
+    const questions = [{
+        type: "input",
+        message: "Enter Employee Last Name",
+        name: "last_name",
+        validate: async (input) => {
+            if (!input.match("^[a-zA-Z]+$")) {
+               return 'Please enter a valid name';
+            }
+      
+            return true;
+         }
+    },
+    {
+        type: "input",
+        message: "Enter Employee First Name",
+        name: "last_name",
+        validate: async (input) => {
+            if (!input.match("^[a-zA-Z]+$")) {
+               return 'Please enter a valid name';
+            }
+      
+            return true;
+         }
+    },
+    {
+        type: "list",
+        message: "Select Employee Role",
+        name: "role",
+        choices: roles
+    },
+    {
+        type: "list",
+        message: "Select Employee Manager",
+        name: "manager",
+        choices: managers
+    }];
+
+    const newEmployee = await inquirer.prompt(questions);
     
+    //insert: (table, cols, values, cb)
+    // orm.insert(
+    //     "employees", 
+    //     ["last_name", "first_name", "role_id", "manager_id"], 
+    //     [newEmployee.last_name, newEmployee.first_name, newEmployee.role.value, newEmployee.manager.value],
+    //     (results) => {
+    //         viewAllEmployees();
+    //     }
+    // );
 }
 
 const removeEmployee = () => {
@@ -185,22 +258,33 @@ const removeDepartment = () => {
 const getDepartmentBudget = () => {
 
 }
-    //select(selection, table, cb)
 
-//view data from two tables
-    //doubleJoin(selection, tOne, tTwo, key1, key2, cb)
+const viewEmployeesByDept = () => {
+    let allDepts;
 
-//view employees
-    //getEmployeeData(cb)
+    //select: (selection, table, cb)
+    orm.select(
+        "department",
+        "departments",
+        (results) => {
+            allDepts = results.map((result) => result.department);
+            console.log(allDepts);
+            
+            inquirer.prompt({
+                type: 'list',
+                message: 'Select a department',
+                name: 'department',
+                choices: allDepts
+            }).then((answer) => {
+                //triple join
 
-//update employee role
-    //set(table, newValues, criteria, cb)
+            })
 
-//update employee manager
-    // orm.set("employees",{manager_id: 3}, {id: 2}, (result) => {
-    //     console.table(result);
-    // });
+            main();
+        }
+    );
+}
 
-// view employees by manager
-
-// view budget for department
+const viewEmployeesByMgr = () => {
+    
+};
