@@ -134,40 +134,25 @@ const viewAllEmployees = () => {
 }
 
 const addEmployee = async () => {
-    //select: (selection, table, cb)
-    const roles = await orm.select(
+    //get data and map to array of choices objects
+    let roles = await orm.select(
             "*",
             "roles"
     );
-    console.log(roles);
+    roles = roles.map((role) => {
+        return { name: role.title, value: role.id}
+    });
 
-    console.log(orm.select("*","roles"));
-    
-    // (results) => {
-    //     let listRoles = results.map((result) => {
-    //         return { name: result.title, value: result.id}
-    //     });
-    //     console.log(listRoles);
-    //     return listRoles;
-    // }
-
-
-
-
-    const managers = await orm.select(
+    //get data and map to array of choices objects
+    let managers = await orm.select(
         "id, CONCAT(first_name, \" \", last_name) AS manager",
         "employees",
-        (results) => {
-            let listEmployees = results.map((result) => {
-                return { name: result.manager, value: result.id}
-            });
-            listEmployees.push({ name: "No Manager", value: 0 });
-            console.log(listEmployees);
-            return listEmployees;
-        }
     );
+    managers = managers.map((mgr) => {
+        return { name: mgr.manager, value: mgr.id}
+    });
+    managers.push({ name: "No Manager", value: 0 }); //handle no manager input
 
-    console.log(managers);
 
     const questions = [{
         type: "input",
@@ -184,7 +169,7 @@ const addEmployee = async () => {
     {
         type: "input",
         message: "Enter Employee First Name",
-        name: "last_name",
+        name: "first_name",
         validate: async (input) => {
             if (!input.match("^[a-zA-Z]+$")) {
                return 'Please enter a valid name';
@@ -207,16 +192,17 @@ const addEmployee = async () => {
     }];
 
     const newEmployee = await inquirer.prompt(questions);
+
+    console.log(newEmployee);
     
-    //insert: (table, cols, values, cb)
-    // orm.insert(
-    //     "employees", 
-    //     ["last_name", "first_name", "role_id", "manager_id"], 
-    //     [newEmployee.last_name, newEmployee.first_name, newEmployee.role.value, newEmployee.manager.value],
-    //     (results) => {
-    //         viewAllEmployees();
-    //     }
-    // );
+    //create new employee object
+    orm.insert(
+        "employees", 
+        ["last_name", "first_name", "role_id", "manager_id"], 
+        [newEmployee.last_name, newEmployee.first_name, newEmployee.role, newEmployee.manager]
+    );
+
+    viewAllEmployees();
 }
 
 const removeEmployee = () => {

@@ -10,7 +10,7 @@ let orm = {
                 if (err) return reject(err);
                 return resolve(data);
             });
-        }
+        })
     },
 
     //select all from table
@@ -33,7 +33,7 @@ let orm = {
                 if (err) return reject(err);
                 return resolve(data);
             });
-        }
+        })
     },
 
     allEmployeeData: () => {
@@ -47,7 +47,7 @@ let orm = {
                 if (err) return reject(err);
                 return resolve(data);
             });
-        }
+        })
     },
     
     //update value
@@ -58,7 +58,7 @@ let orm = {
                 if (err) return reject(err);
                 return resolve(data);
             });
-        }
+        })
     },
 
     //remove row
@@ -69,7 +69,7 @@ let orm = {
                 if (err) return reject(err);
                 return resolve(data);
             });
-        }
+        })
     },
 
     end: () => {
