@@ -62,10 +62,10 @@ let orm = {
     },
 
     //remove row
-    remove: (table, criteria) => {
+    remove: (table, field, criteria) => {
         return new Promise((resolve, reject) => {
-            let query =`DELETE FROM ?? WHERE ?`;
-            connection.query(query, [table, criteria], (err, data) => {
+            let query =`DELETE FROM ?? WHERE ??=?`;
+            connection.query(query, [table, field, criteria], (err, data) => {
                 if (err) return reject(err);
                 return resolve(data);
             });

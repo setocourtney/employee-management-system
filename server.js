@@ -125,6 +125,7 @@ const runAction = (action) => {
 
 //application functions
 
+//display table of all employee data including role, salary, department, and manager
 const viewAllEmployees = async () => {
     orm.allEmployeeData().then((results) => {
         console.log("\n");
@@ -153,7 +154,7 @@ const addEmployee = async () => {
     });
     managers.push({ name: "No Manager", value: 0 }); //handle no manager input
 
-
+    //get new employee info from user
     const questions = [{
         type: "input",
         message: "Enter Employee Last Name",
@@ -162,7 +163,6 @@ const addEmployee = async () => {
             if (!input.match("^[a-zA-Z]+$")) {
                return 'Please enter a valid name';
             }
-      
             return true;
          }
     },
@@ -174,7 +174,6 @@ const addEmployee = async () => {
             if (!input.match("^[a-zA-Z]+$")) {
                return 'Please enter a valid name';
             }
-      
             return true;
          }
     },
@@ -192,8 +191,6 @@ const addEmployee = async () => {
     }];
 
     const newEmployee = await inquirer.prompt(questions);
-
-    console.log(newEmployee);
     
     //create new employee object
     orm.insert(
@@ -201,12 +198,47 @@ const addEmployee = async () => {
         ["last_name", "first_name", "role_id", "manager_id"], 
         [newEmployee.last_name, newEmployee.first_name, newEmployee.role, newEmployee.manager]
     ).then(() => {
-        console.log("Employee has been added");
+        console.log(`${newEmployee.first_name} has been added`);
         main();
     }).catch((err) => {console.error(err)});
 }
 
-const removeEmployee = () => {
+const removeEmployee = async () => {
+
+    //get data and map to array of choices objects
+    let employees = await orm.select("*", "employees");
+    employees = employees.map((emp) => {
+        return {
+            name: `${emp.first_name} ${emp.last_name}`,
+            value: emp.id
+        }
+    });
+
+    //get employee to remove
+    const empToRemove = await inquirer.prompt({
+        type: "list",
+        message: "Select Employee to Remove",
+        name: "remove_emp",
+        choices: employees
+    });
+
+    //confirm removal
+    const confirmRemove = await inquirer.prompt({
+        type: "confirm",
+        message: "Are you sure you want to remove employee?",
+        name: "toRemove"
+    });
+
+    //if confirmed remove employee, else return to main menu
+    if (confirmRemove.toRemove) {
+        orm.remove("employees", "id", empToRemove.remove_emp)
+        .then(() => {
+            console.log("Employee has been removed");
+            main();
+        }).catch((err) => console.error(err));
+    } else {
+        main();
+    }
 
 }
 
@@ -247,29 +279,29 @@ const getDepartmentBudget = () => {
 }
 
 const viewEmployeesByDept = () => {
-    let allDepts;
+    // let allDepts;
 
-    //select: (selection, table, cb)
-    orm.select(
-        "department",
-        "departments",
-        (results) => {
-            allDepts = results.map((result) => result.department);
-            console.log(allDepts);
+    // //select: (selection, table, cb)
+    // orm.select(
+    //     "department",
+    //     "departments",
+    //     (results) => {
+    //         allDepts = results.map((result) => result.department);
+    //         console.log(allDepts);
             
-            inquirer.prompt({
-                type: 'list',
-                message: 'Select a department',
-                name: 'department',
-                choices: allDepts
-            }).then((answer) => {
-                //triple join
+    //         inquirer.prompt({
+    //             type: 'list',
+    //             message: 'Select a department',
+    //             name: 'department',
+    //             choices: allDepts
+    //         }).then((answer) => {
+    //             //triple join
 
-            })
+    //         })
 
-            main();
-        }
-    );
+    //         main();
+    //     }
+    // );
 }
 
 const viewEmployeesByMgr = () => {
