@@ -126,11 +126,12 @@ const runAction = (action) => {
 //application functions
 
 const viewAllEmployees = async () => {
-    let results = await orm.allEmployeeData();
-    console.log("\n");
-    console.table(results);
-    main();
-}
+    orm.allEmployeeData().then((results) => {
+        console.log("\n");
+        console.table(results);
+        main();
+    }).catch((err) => {console.error(err)});
+};
 
 const addEmployee = async () => {
     //get data and map to array of choices objects
@@ -199,9 +200,10 @@ const addEmployee = async () => {
         "employees", 
         ["last_name", "first_name", "role_id", "manager_id"], 
         [newEmployee.last_name, newEmployee.first_name, newEmployee.role, newEmployee.manager]
-    );
-
-    viewAllEmployees();
+    ).then(() => {
+        console.log("Employee has been added");
+        main();
+    }).catch((err) => {console.error(err)});
 }
 
 const removeEmployee = () => {

@@ -26,7 +26,6 @@ last_name varchar(30) NOT NULL,
 role_id int NOT NULL,
 manager_id int,
 PRIMARY KEY (id),
-FOREIGN KEY (role_id) REFERENCES roles(id)  ON UPDATE CASCADE,
-FOREIGN KEY (manager_id) REFERENCES employees(id) ON UPDATE CASCADE
+FOREIGN KEY (role_id) REFERENCES roles(id)  ON UPDATE CASCADE
 );
 
