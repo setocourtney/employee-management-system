@@ -125,12 +125,11 @@ const runAction = (action) => {
 
 //application functions
 
-const viewAllEmployees = () => {
-    orm.allEmployeeData((results) => {
-        console.log("\n");
-        console.table(results);
-        main();
-    });
+const viewAllEmployees = async () => {
+    let results = await orm.allEmployeeData();
+    console.log("\n");
+    console.table(results);
+    main();
 }
 
 const addEmployee = async () => {
