@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/setocourtney/employee-management-system#readme",
   "dependencies": {
+    "console.table": "^0.10.0",
     "inquirer": "^7.0.6",
     "mysql": "^2.18.1"
   }

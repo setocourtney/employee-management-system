@@ -36,6 +36,19 @@ let orm = {
         })
     },
 
+    //join two tables with criteria
+    doubleJoinWhere: (selection, tOne, tTwo, key1, key2, field, criteria) => {
+        return new Promise((resolve, reject) => {
+            let query = `SELECT ${selection.toString()} FROM ${tOne} AS tOne
+            JOIN ${tTwo} AS tTwo ON tOne.${key1}=tTwo.${key2}
+            WHERE ??=?;`
+            connection.query(query, [field, criteria], (err, data) => {
+                if (err) return reject(err);
+                return resolve(data);
+            });
+        })
+    },
+
     allEmployeeData: () => {
         return new Promise((resolve, reject) => {
             let query = `SELECT tOne.id, tOne.first_name, tOne.last_name, tTwo.title, tTwo.salary, tThree.department, CONCAT(tFour.first_name, " ",tFour.last_name) AS manager

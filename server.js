@@ -1,5 +1,6 @@
 const inquirer = require("inquirer");
 const orm = require("./config/orm.js");
+const ctable = require("console.table");
 
 //list application action choices and returns prompt object
 const getAction = () => {
@@ -115,7 +116,7 @@ const addEmployee = async () => {
         ["last_name", "first_name", "role_id", "manager_id"], 
         [newEmployee.last_name, newEmployee.first_name, newEmployee.role, newEmployee.manager]
     ).then(() => {
-        console.log(`${newEmployee.first_name} ${newEmployee.last_name} has been added`);
+        console.log(`\n ${newEmployee.first_name} ${newEmployee.last_name} has been added \n`);
         main();
     }).catch((err) => {console.error(err)});
 }
@@ -123,18 +124,15 @@ const addEmployee = async () => {
 
 //remove employee from db
 const removeEmployee = async () => {
-    const empToRemove = await getEmployee();
-    const confirmRemove = await inquirer.prompt({
-        type: "confirm",
-        message: "Are you sure you want to remove employee?",
-        name: "toRemove"
-    });
+    const employees = await getEmployees();
+    const empToRemove = await getSelection(employees, "employee");
+    const confirmRemove = await confirm();
 
     //if confirmed remove employee, else return to main menu
-    if (confirmRemove.toRemove) {
-        orm.remove("employees", "id", empToRemove.selectedEmp)
+    if (confirmRemove.toContinue) {
+        orm.remove("employees", "id", empToRemove.name)
         .then(() => {
-            console.log("Employee has been removed");
+            console.log(`\n Employee has been removed \n`);
             main();
         }).catch((err) => console.error(err));
     } else {
@@ -145,7 +143,8 @@ const removeEmployee = async () => {
 
 //update existing employee in db
 const updateEmployee = async () => {
-    const empToUpdate = await getEmployee();
+    const employees = await getEmployees();
+    const empToUpdate = await getSelection(employees, "employee");
     const newInfo = await getEmployeeData();
 
     //update employee based on id
@@ -158,9 +157,9 @@ const updateEmployee = async () => {
             manager_id: newInfo.manager
         },
         "id",
-        empToUpdate.selectedEmp
+        empToUpdate.name
     ).then(() => {
-        console.log(`${newInfo.first_name} ${newInfo.last_name} has been updated`);
+        console.log(`\n ${newInfo.first_name} ${newInfo.last_name} has been updated \n`);
         main();
     }).catch((err) => {console.error(err)});
 }
@@ -190,7 +189,8 @@ const manageRoles = async () => {
 
 //update existing role in db
 const updateRole = async () => {
-    const selectedRole = await getRole();
+    const roles = await getRoles();
+    const selectedRole = await getSelection(roles, "role");
     const roleInfo = await getRoleData();
 
     orm.set(
@@ -200,9 +200,9 @@ const updateRole = async () => {
             department_id: roleInfo.department
         },
         "id",
-        selectedRole.selectedRole
+        selectedRole.name
     ).then(() => {
-        console.log(`${roleInfo.title} has been updated`);
+        console.log(`\n ${roleInfo.title} has been updated \n`);
         main();
     }).catch((err) => {console.error(err)});
 }
@@ -210,18 +210,15 @@ const updateRole = async () => {
 
 //remove role from db
 const removeRole = async () => {
-    const selectedRole = await getRole();
-    const confirmRemove = await inquirer.prompt({
-        type: "confirm",
-        message: "Are you sure you want to remove role?",
-        name: "toRemove"
-    });
+    const roles = await getRoles();
+    const selectedRole = await getSelection(roles, "role");
+    const confirmRemove = await confirm();
 
     //if confirmed remove role, else return to main menu
-    if (confirmRemove.toRemove) {
-        orm.remove("roles", "id", selectedRole.selectedRole)
+    if (confirmRemove.toContinue) {
+        orm.remove("roles", "id", selectedRole.name)
         .then(() => {
-            console.log("Role has been removed");
+            console.log(`\n Role has been removed \n`);
             main();
         }).catch((err) => console.error(err));
     } else {
@@ -237,7 +234,7 @@ const createRole = async () => {
         ["title", "salary", "department_id"], 
         [newRole.title, newRole.salary, newRole.department]
     ).then(() => {
-        console.log(`${newRole.title} has been added`);
+        console.log(`\n ${newRole.title} has been added \n`);
         main();
     }).catch((err) => {console.error(err)});
 }
@@ -267,7 +264,8 @@ const manageDepartments = async () => {
 
 //update existing dept in db
 const updateDept = async () => {
-    const selectedDept = await getDept();
+    const depts = await getDepartments();
+    const selectedDept = await getSelection(depts, "department");
     const deptInfo = await inquirer.prompt({
         type: "input",
         message: "What is the Department Name?",
@@ -285,9 +283,9 @@ const updateDept = async () => {
             department: deptInfo.department
         },
         "id",
-        selectedDept.selectedDept
+        selectedDept.name
     ).then(() => {
-        console.log(`${deptInfo.department} has been updated`);
+        console.log(`\n ${deptInfo.department} has been updated \n`);
         main();
     }).catch((err) => {console.error(err)});
 }
@@ -295,17 +293,14 @@ const updateDept = async () => {
 
 //remove deptartment from db
 const removeDept = async () => {
-    const selectedDept = await getDept();
-    const confirmRemove = await inquirer.prompt({
-        type: "confirm",
-        message: "Are you sure you want to remove department?",
-        name: "toRemove"
-    });
+    const depts = await getDepartments();
+    const selectedDept = await getSelection(depts, "department");
+    const confirmRemove = await confirm();
 
-    if (confirmRemove.toRemove) {
-        orm.remove("departmnets", "id", selectedDept.selectedDept)
+    if (confirmRemove.toContinue) {
+        orm.remove("departmnets", "id", selectedDept.name)
         .then(() => {
-            console.log("Department has been removed");
+            console.log(`\n Department has been removed \n`);
             main();
         }).catch((err) => console.error(err));
     } else {
@@ -339,17 +334,53 @@ const createDept = async () => {
 }
 
 
-//
-const getDepartmentBudget = () => {
-
+//view all employees for selected department
+const viewEmployeesByDept = async () => {
+    const depts = await getDepartments();
+    const selectedDept = await getSelection(depts, "department");
+    orm.doubleJoinWhere(
+        "tOne.last_name, tOne.first_name, tTwo.title, tTwo.salary, tOne.manager_id",
+        "employees",
+        "roles",
+        "role_id",
+        "id",
+        "tTwo.department_id",
+        selectedDept.name
+    ).then((results) => {
+        console.log(`\n Department Employees: \n`);
+        if(results.length > 0) {
+            console.table(results);
+        } else {
+            console.log(`No employees to display \n`);
+        }
+        main();
+    }).catch((err) => {console.error(err)});
 }
 
-const viewEmployeesByDept = () => {
 
-}
+//view all employees of selected manager
+const viewEmployeesByMgr = async () => {
+    const managers = await getManagers();
 
-const viewEmployeesByMgr = () => {
-    
+    const selectedMgr = await getSelection(managers, "manager")
+
+    orm.doubleJoinWhere(
+        "tOne.last_name, tOne.first_name, tTwo.title, tTwo.salary, tOne.manager_id",
+        "employees",
+        "roles",
+        "role_id",
+        "id",
+        "tOne.manager_id",
+        selectedMgr.name
+    ).then((results) => {
+        console.log(`\n Manager Employees: \n`);
+        if(results.length > 0) {
+            console.table(results);
+        } else {
+            console.log(`\n No employees to display \n`);
+        }
+        main();
+    }).catch((err) => {console.error(err)});
 };
 
 
@@ -361,6 +392,7 @@ const viewEmployeesByMgr = () => {
 const getEmployeeData = async () => {
     const roles = await getRoles();
     const managers = await getManagers();
+
 
     const questions = [{
         type: "input",
@@ -401,8 +433,8 @@ const getEmployeeData = async () => {
 }
 
 
-//prompts user to select an employee
-const getEmployee = async () => {
+//get current list of employees
+const getEmployees = async () => {
     let employees = await orm.select("*", "employees");
     employees = employees.map((emp) => {
         return {
@@ -410,14 +442,7 @@ const getEmployee = async () => {
             value: emp.id
         }
     });
-
-    return inquirer.prompt({
-        type: "list",
-        message: "Select Employee",
-        name: "selectedEmp",
-        choices: employees
-    });
-
+    return employees;
 }
 
 
@@ -469,19 +494,6 @@ const getDepartments = async () => {
 }
 
 
-//prompt user to select department
-const getDept = async () => {
-    const departments = await getDepartments();
-
-    return inquirer.prompt({
-        type: "list",
-        message: "Select role to update",
-        name: "selectedDept",
-        choices: departments
-    });
-}
-
-
 //get current list of roles
 const getRoles = async () => {
     let roles = await orm.select("*", "roles");
@@ -492,15 +504,13 @@ const getRoles = async () => {
 }
 
 
-//prompt user to select role
-const getRole = async () => {
-    const roles = await getRoles();
-
+//prompt user for selection from list
+const getSelection = async (array, field) => {
     return inquirer.prompt({
         type: "list",
-        message: "Select role to update",
-        name: "selectedRole",
-        choices: roles
+        message: `Select ${field}`,
+        name: "name",
+        choices: array
     });
 }
 
@@ -513,5 +523,14 @@ const getManagers = async () => {
     });
     managers.push({ name: "No Manager", value: 0 }); //handle no manager input
     return managers;
+}
+
+//confirm continue
+const confirm = async () => {
+    return inquirer.prompt({
+        type: "confirm",
+        message: "Are you sure you want to continue?",
+        name: "toContinue"
+    });
 }
 
