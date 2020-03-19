@@ -2,6 +2,8 @@
 
 Command line application content management system for managing a company's employees using node, inquirer, and MySQL.
 
+
+
 ## Interface
 
 Start application:
@@ -25,6 +27,8 @@ Features:
   * Delete departments, roles, and employees
 
   * Update employees, departments, roles
+
+
 
 ## Database
 
@@ -50,9 +54,9 @@ Features:
   * **role_id** - INT to hold reference to role employee has
   * **manager_id** - INT to hold reference to another employee that manager of the current employee. This field may be null if the employee has no manager
   
+  
 
 ## Packages
-
 
 * Uses the [MySQL](https://www.npmjs.com/package/mysql) NPM package connect to database and perform queries
 
@@ -61,6 +65,7 @@ Features:
 * Uses [console.table](https://www.npmjs.com/package/console.table) to print MySQL rows to the console.
 
 Refer to package.json for dependencies
+
 
 
 ## Directory
