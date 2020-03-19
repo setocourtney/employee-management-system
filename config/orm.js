@@ -51,10 +51,10 @@ let orm = {
     },
     
     //update value
-    set: (table, newValues, criteria) => {
+    set: (table, newValues, field, criteria) => {
         return new Promise((resolve, reject) => {
-            let query = `UPDATE ?? SET ? WHERE ?`;
-            connection.query(query, [table, newValues, criteria], (err, data) => {
+            let query = `UPDATE ?? SET ? WHERE ??=?`;
+            connection.query(query, [table, newValues, field, criteria], (err, data) => {
                 if (err) return reject(err);
                 return resolve(data);
             });
